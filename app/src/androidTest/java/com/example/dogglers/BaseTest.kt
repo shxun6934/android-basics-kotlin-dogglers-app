@@ -28,21 +28,22 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.NoMatchingViewException
 import androidx.test.espresso.ViewAssertion
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.contrib.RecyclerViewActions.scrollToPosition
 import androidx.test.espresso.matcher.BoundedMatcher
-import androidx.test.espresso.matcher.ViewMatchers
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withText
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.espresso.matcher.ViewMatchers.*
 import com.example.dogglers.BaseTest.DrawableMatcher.withDrawable
 import com.example.dogglers.data.DataSource
 import org.hamcrest.CoreMatchers
 import org.hamcrest.Description
 import org.hamcrest.Matcher
-import java.lang.IllegalStateException
 
 open class BaseTest {
 
-    val lastPosition = DataSource.dogs.size - 1
+    private val lastPosition = DataSource.dogs.size - 1
+
+    fun scrollToLastPosition(viewId: Int) {
+        onView(withId(viewId)).perform(scrollToPosition<RecyclerView.ViewHolder>(lastPosition))
+    }
 
     /**
      * Check the content of a card
@@ -66,9 +67,12 @@ open class BaseTest {
     /**
      * Check the content of the first card
      */
-    fun checkFirstPosition() {
-        hasListItemContent("Tzeitel", "Age: 7", "Hobbies: sunbathing",
-            R.drawable.tzeitel)
+    fun checkFirstPosition(name: String, age: String, hobbies: String, imageResource: Int) {
+        hasListItemContent(name, age, hobbies, imageResource)
+    }
+
+    fun checkLastPosition(name: String, age: String, hobbies: String, imageResource: Int) {
+        hasListItemContent(name, age, hobbies, imageResource)
     }
 
     /**
@@ -127,9 +131,9 @@ open class BaseTest {
          */
         private fun getBitmap(drawable: Drawable): Bitmap {
             val bitmap = Bitmap.createBitmap(
-                    drawable.intrinsicWidth,
-                    drawable.intrinsicHeight,
-                    Bitmap.Config.ARGB_8888
+                drawable.intrinsicWidth,
+                drawable.intrinsicHeight,
+                Bitmap.Config.ARGB_8888
             )
             val canvas = Canvas(bitmap)
             drawable.setBounds(0, 0, canvas.width, canvas.height)
@@ -160,7 +164,7 @@ open class BaseTest {
                 }
 
                 // Check item count
-                ViewMatchers.assertThat(
+                assertThat(
                     "RecyclerView item count",
                     view.adapter?.itemCount,
                     CoreMatchers.equalTo(count)

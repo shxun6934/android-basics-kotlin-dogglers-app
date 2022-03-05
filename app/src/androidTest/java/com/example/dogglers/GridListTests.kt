@@ -15,16 +15,15 @@
 */
 package com.example.dogglers
 
-import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.swipeUp
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.contrib.RecyclerViewActions.scrollToPosition
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.example.dogglers.BaseTest.DrawableMatcher.hasItemCount
+import com.example.dogglers.data.DataSource
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,12 +33,18 @@ import org.junit.runner.RunWith
 class GridListTests : BaseTest() {
 
     @get:Rule
-    var activityRule: ActivityScenarioRule<GridListActivity>
-            = ActivityScenarioRule(GridListActivity::class.java)
+    var activityRule: ActivityScenarioRule<GridListActivity> =
+        ActivityScenarioRule(GridListActivity::class.java)
 
     @Test
     fun `grid_list_content_at_first_position`() {
-        checkFirstPosition()
+        val firstDog = DataSource.dogs.first()
+        checkFirstPosition(
+            firstDog.name,
+            "Age: ${firstDog.age}",
+            "Hobbies: ${firstDog.hobbies}",
+            firstDog.imageResourceId
+        )
     }
 
     @Test
@@ -49,9 +54,15 @@ class GridListTests : BaseTest() {
 
     @Test
     fun `grid_list_content_at_last_position`() {
-        onView(withId(R.id.grid_recycler_view))
-            .perform(scrollToPosition<RecyclerView.ViewHolder>(lastPosition))
-        onView(withText("Bella")).check(matches(isDisplayed()))
+        val lastDogs = DataSource.dogs.last()
+
+        scrollToLastPosition(R.id.grid_recycler_view)
+        checkLastPosition(
+            lastDogs.name,
+            "Age: ${lastDogs.age}",
+            "Hobbies: ${lastDogs.hobbies}",
+            lastDogs.imageResourceId
+        )
     }
 
     @Test
@@ -63,6 +74,7 @@ class GridListTests : BaseTest() {
 
     @Test
     fun `recycler_view_item_count`() {
-        onView(withId(R.id.grid_recycler_view)).check(hasItemCount(6))
+        val dogs = DataSource.dogs
+        onView(withId(R.id.grid_recycler_view)).check(hasItemCount(dogs.size))
     }
 }
